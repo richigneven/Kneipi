@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block content %}
+  <form method="get">
+    <input name="q" placeholder="Search city or name" value="{{ q }}">
+    <button type="submit">Search</button>
+  </form>
+
+  <div style="display:flex; gap:1rem; margin-top:1rem;">
+    <div style="flex:1;">
+      <ul>
+        {% for bar in bars %}
+          <li>
+            <a href="{% url 'tappy:detail' bar.pk %}">{{ bar.name }}</a>
+            {% if bar.city %} — {{ bar.city }}{% endif %}
+          </li>
+        {% empty %}
+          <li>No bars found yet.</li>
+        {% endfor %}
+      </ul>
+    </div>
+    <div style="flex:1;">
+      <div id="map"></div>
+    </div>
+  </div>
+
+  <script>
+    const bars = [
+      {% for bar in bars %}
+      {
+        name: "{{ bar.name|escapejs }}",
+        lat: {{ bar.latitude|default:'null' }},
+        lon: {{ bar.longitude|default:'null' }},
+        url: "{% url 'tappy:detail' bar.pk %}"
+      },
+      {% endfor %}
+    ];
+
+    const map = L.map('map').setView([51.1657, 10.4515], 6);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19
+    }).addTo(map);
+
+    bars.forEach(b => {
+      if (b.lat && b.lon) {
+        const m = L.marker([b.lat, b.lon]).addTo(map);
+        m.bindPopup(`<a href="${b.url}">${b.name}</a>`);
+      }
+    });
+  </script>
+{% endblock %}

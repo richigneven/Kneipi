@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+  <h2>{{ bar.name }}</h2>
+  <p>{{ bar.description }}</p>
+  <p>{{ bar.address }} {% if bar.city %}, {{ bar.city }}{% endif %}</p>
+  <div id="map"></div>
+  <script>
+    const lat = {{ bar.latitude|default:'null' }};
+    const lon = {{ bar.longitude|default:'null' }};
+    const zoom = (lat && lon) ? 15 : 6;
+    const map = L.map('map').setView([lat || 51.1657, lon || 10.4515], zoom);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
+    {% if bar.latitude and bar.longitude %}
+    L.marker([{{ bar.latitude }}, {{ bar.longitude }}]).addTo(map);
+    {% endif %}
+  </script>
+{% endblock %}
